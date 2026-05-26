@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pravin Namaji | Premium 3D Interactive Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800;900&display=swap');
+
+        :root {
+            /* Vibrant, Premium, Colorful UI Palette */
+            --bg-gradient: linear-gradient(135deg, #120c1f 0%, #1a1c4b 40%, #2a3a7c 75%, #0d4b75 100%);
+            --panel-bg: rgba(255, 255, 255, 0.07);
+            --panel-border: rgba(255, 255, 255, 0.18);
+            --neon-cyan: #00f0ff;
+            --neon-blue: #38ef7d;
+            --neon-vibrant: #ff007f;
+            --neon-green: #39ff14;
+            --text-main: #ffffff;
+            --text-muted: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html, body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            perspective: 1400px;
+        }
+
+        /* --- LOADER SYSTEM FIXED --- */
+        #loading-screen {
+            position: fixed; inset: 0; 
+            background: #0b0c16; 
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+            font-family: 'Fira Code', monospace;
+        }
+        .loader-terminal-box {
+            width: 90%; max-width: 500px; background: #05050a; border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 12px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); margin-bottom: 25px;
+        }
+        .terminal-stream { font-size: 0.75rem; color: var(--neon-green); line-height: 1.6; height: 90px; overflow: hidden; }
+        .loading-bar-wrapper {
+            width: 100%; height: 3px; background: rgba(255,255,255,0.05);
+            border-radius: 4px; overflow: hidden; margin-top: 15px;
+        }
+        .loading-bar-progress {
+            width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-vibrant), var(--neon-cyan));
+            animation: loadProgress 2.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+        .intro-title-text {
+            font-size: 1.6rem; font-weight: 900; font-family: 'Inter', sans-serif;
+            opacity: 0; transform: translateY(15px); text-align: center;
+            animation: textFadeIn 0.8s 0.6s ease-out forwards;
+            letter-spacing: -0.5px;
+        }
+        .intro-title-text span { color: var(--neon-cyan); text-shadow: 0 0 15px rgba(0,240,255,0.4); }
+
+        @keyframes loadProgress { 100% { width: 100%; } }
+        @keyframes textFadeIn { 100% { opacity: 1; transform: translateY(0); } }
+
+        /* Ambient Background Orbs */
+        .glow-orb-1 { position: fixed; top: -10%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 240, 255, 0.2) 0%, transparent 70%); filter: blur(70px); pointer-events: none; z-index: -1; }
+        .glow-orb-2 { position: fixed; bottom: -10%; right: -10%; width: 700px; height: 700px; background: radial-gradient(circle, rgba(255, 0, 127, 0.15) 0%, transparent 70%); filter: blur(90px); pointer-events: none; z-index: -1; }
+
+        /* --- VIEWPORT DECK SLIDE CONFIGURATION --- */
+        .viewport-deck {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1);
+            transform-style: preserve-3d;
+        }
+
+        .deck-section {
+            width: 100%; height: 100vh; flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
+            padding: 60px 20px; position: relative;
+            transform-style: preserve-3d;
+        }
+
+        /* 3D Glassmorphic Container Card */
+        .content-card-premium {
+            width: 100%; max-width: 1150px; max-height: 80vh;
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 28px; padding: 50px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.2);
+            backdrop-filter: blur(35px);
+            opacity: 0.15; transform: translateY(40px) translateZ(-100px);
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;
+            overflow-y: auto;
+            transform-style: preserve-3d;
+        }
+        .deck-section.active-slide .content-card-premium { opacity: 1; transform: translateY(0) translateZ(0); }
+
+        .content-card-premium::-webkit-scrollbar { width: 6px; }
+        .content-card-premium::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.4); border-radius: 10px; }
+
+        /* --- STICKY NAVIGATION BAR --- */
+        .fixed-navigation-bar {
+            position: fixed; top: 30px; left: 50px; right: 50px; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+        }
+        .logo-text { font-family: 'Fira Code', monospace; font-weight: 900; font-size: 1.2rem; }
+        .logo-text span { color: var(--neon-cyan); }
+        
+        .side-dots-tracker { display: flex; flex-direction: column; gap: 14px; position: fixed; right: 40px; top: 50%; transform: translateY(-50%); z-index: 100; }
+        .tracker-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s; cursor: pointer; border: 1px solid rgba(0,0,0,0.2); }
+        .tracker-dot.active-dot { background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.4); }
+
+        /* SCROLL INSTRUCTION HINT */
+        .scroll-hint-wrapper {
+            position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0,240,255,0.4); animation: floatPrompt 2s infinite ease-in-out;
+            cursor: pointer; pointer-events: auto; z-index: 10;
+        }
+        .mouse-icon { width: 22px; height: 36px; border: 2px solid var(--neon-cyan); border-radius: 12px; position: relative; }
+        .mouse-icon::before { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 4px; height: 8px; background: var(--neon-cyan); border-radius: 2px; animation: scrollWheel 1.5s infinite; }
+        
+        @keyframes scrollWheel { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 10px); } }
+        @keyframes floatPrompt { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -10px); } }
+
+        /* --- HERO VIEWPORT CONTENTS --- */
+        .hero-title { font-size: 3.8rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 25px; line-height: 1.1; transform: translateZ(30px); }
+        .hero-title span { color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0,240,255,0.2); }
+        .hero-paragraph { color: var(--text-muted); font-size: 1.15rem; max-width: 850px; line-height: 1.7; margin-bottom: 40px; transform: translateZ(20px); }
+        .metrics-pill-container { display: flex; gap: 20px; flex-wrap: wrap; transform: translateZ(10px); }
+        .metric-badge-node { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 16px 30px; border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 0.95rem; }
+        .metric-badge-node b { color: var(--neon-cyan); font-size: 1.4rem; }
+
+        /* --- SKILLS GRID SYSTEM --- */
+        .section-headline { font-family: 'Fira Code', monospace; font-size: 1.6rem; font-weight: 800; margin-bottom: 45px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 15px; }
+        .section-headline span { color: var(--neon-cyan); }
+        
+        .skills-grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        .skill-track-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); padding: 25px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .skill-title-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .skill-title-row h4 { font-size: 1.1rem; font-weight: 700; }
+        .skill-title-row span { font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--neon-cyan); text-transform: uppercase; font-weight: bold; }
+        
+        .progress-slot-track { width: 100%; height: 6px; background: rgba(0,0,0,0.4); border-radius: 10px; overflow: hidden; }
+        .progress-slot-fill { height: 100%; background: linear-gradient(90deg, #00f0ff, #ff007f); width: 0%; transition: width 1.8s cubic-bezier(0.1, 0.8, 0.2, 1); }
+        
+        .legend-labels-wrapper { display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; font-family: 'Fira Code', monospace; margin-top: 10px; }
+        .legend-labels-wrapper span.active-tier-status { color: var(--neon-green); font-weight: bold; text-shadow: 0 0 8px rgba(57,255,20,0.4); }
+
+        /* --- WORKING EXPERIENCE --- */
+        .experience-vertical-line { border-left: 2px solid rgba(255,255,255,0.08); padding-left: 30px; display: flex; flex-direction: column; gap: 45px; }
+        .experience-segment-block { position: relative; }
+        .company-header-wrapper { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .company-main-title { font-size: 1.5rem; font-weight: 800; }
+        .company-main-title span { font-size: 0.95rem; color: var(--neon-cyan); font-family: 'Fira Code', monospace; display: block; margin-top: 4px; }
+        .duration-pill-badge { font-family: 'Fira Code', monospace; font-size: 0.8rem; background: rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 30px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); }
+        
+        .star-performer-tag-glow { display: inline-flex; align-items: center; gap: 8px; background: rgba(57, 255, 20, 0.12); border: 1px solid var(--neon-green); padding: 5px 12px; border-radius: 8px; color: var(--neon-green); font-family: 'Fira Code', monospace; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 0.5px; box-shadow: 0 0 15px rgba(57,255,20,0.2); }
+        
+        .bullet-details-list { list-style: none; color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; }
+        .bullet-details-list li { margin-bottom: 8px; padding-left: 20px; position: relative; }
+        .bullet-details-list li::before { content: '👉'; position: absolute; left: 0; font-size: 0.85rem; }
+
+        /* --- PROJECTS DATA COMPONENT --- */
+        .projects-scroll-wrapper { display: flex; flex-direction: column; gap: 25px; }
+        .project-display-pod { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 30px; border-left: 5px solid var(--neon-cyan); transition: all 0.3s; }
+        .project-display-pod:hover { border-color: var(--neon-vibrant); background: rgba(255,255,255,0.04); transform: scale(1.005); }
+        .project-display-pod h3 { font-size: 1.35rem; font-weight: 800; margin-bottom: 8px; }
+        .project-display-pod p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; margin-bottom: 15px; }
+        .badges-row-cluster span { display: inline-block; font-family: 'Fira Code', monospace; font-size: 0.75rem; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.2); padding: 3px 12px; border-radius: 6px; color: var(--neon-cyan); margin-right: 8px; margin-bottom: 6px; }
+
+        /* --- SYSTEM PUBLICATIONS & CREDENTIALS --- */
+        .publications-layout-split { display: grid; grid-template-columns: repeat(2, 1fr); gap: 35px; }
+        .publication-card-pod { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 30px; border-radius: 20px; }
+        .compliance-badge-pills { display: inline-flex; align-items: center; gap: 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-cyan); padding: 10px 18px; border-radius: 10px; color: #fff; font-weight: bold; margin-bottom: 20px; font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+
+        /* --- CONTACT GATEWAY FORM --- */
+        .form-console-rig { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.08); padding: 35px; border-radius: 20px; box-shadow: inset 0 4px 30px rgba(0,0,0,0.5); }
+        .form-nodes-flex { display: flex; flex-direction: column; gap: 24px; }
+        .form-node-block { display: flex; flex-direction: column; gap: 8px; font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+        .form-node-block label { color: var(--neon-cyan); font-weight: bold; }
+        
+        .form-node-block input, .form-node-block textarea { background: transparent; border: none; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); color: var(--neon-green); font-family: 'Fira Code', monospace; font-size: 0.9rem; padding: 10px 4px; width: 100%; transition: all 0.3s; }
+        .form-node-block input:focus, .form-node-block textarea:focus { outline: none; border-bottom-color: var(--neon-cyan); background: rgba(255,255,255,0.02); padding-left: 8px; }
+        .form-node-block textarea { height: 75px; resize: none; }
+        
+        .dispatch-stream-btn { background: linear-gradient(135deg, var(--neon-cyan), #0072ff); color: #fff; border: none; padding: 15px 40px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; align-self: flex-start; box-shadow: 0 8px 25px rgba(0,240,255,0.25); }
+        .dispatch-stream-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(0,240,255,0.4); }
+        .console-status-log-box { background: #05070a; border-left: 4px solid var(--neon-green); padding: 20px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--neon-green); margin-top: 25px; line-height: 1.6; }
+        .hidden { display: none; }
+
+        /* --- HYPER-RESPONSIVE MEDIA CONFIGS --- */
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 3rem; }
+            .skills-grid-layout, .publications-layout-split { grid-template-columns: 1fr; }
+            .content-card-premium { padding: 35px; max-height: 85vh; }
+        }
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.2rem; }
+            .fixed-navigation-bar, .side-dots-tracker { display: none; }
+            .content-card-premium { padding: 25px; max-height: 88vh; }
+            .company-header-wrapper { flex-direction: column; gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="loader-terminal-box">
+            <div class="terminal-stream" id="terminalStreamOutput">
+                &gt; Booting portfolio_os systems cluster...<br>
+                &gt; Spawning remote worker pools... Connection mapping active.<br>
+            </div>
+            <div class="loading-bar-wrapper"><div class="loading-bar-progress"></div></div>
+        </div>
+        <div class="intro-title-text">Interactive Resume of <span>Pravin Namaji</span></div>
+    </div>
+
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <div class="fixed-navigation-bar">
+        <div class="logo-text">PORTFOLIO_3D::<span class="neon-text">PRAVIN_NAMAJI</span></div>
+    </div>
+
+    <div class="side-dots-tracker" id="dots-container"></div>
+
+    <div class="viewport-deck" id="mainDeck">
+        
+        <section class="deck-section active-slide" id="slide-hero">
+            <div class="content-card-premium" id="heroCard">
+                <span style="font-family:'Fira Code', monospace; color:var(--neon-cyan); font-size:0.85rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:15px; display:block;">[ System Core Ingestion ]</span>
+                <h1 class="hero-title">Python <span>Django Developer</span></h1>
+                <p class="hero-paragraph">
+                    Hi, I am Pravin Namaji, a dedicated Python Django Developer located in Solapur, Maharashtra. I specialize in architecting production-grade backend software monoliths, configuring scalable RESTful API environments, and driving asynchronous execution queues pipelines single-handedly.
+                </p>
+                <div class="metrics-pill-container">
+                    <div class="metric-badge-node">Production Experience: <b>2+ Years</b></div>
+                    <div class="metric-badge-node">Total Applications Shipped: <b>9 Projects</b></div>
+                    <div class="metric-badge-node">Operational Mode: <b>100% Sole Backend Architect</b></div>
+                </div>
+            </div>
+            <div class="scroll-hint-wrapper" onclick="triggerNextSlideStep()">
+                <span>Scroll Down to Inspect Core</span>
+                <div class="mouse-icon"></div>
+            </div>
+        </section>
+
+        <section class="deck-section" id="slide-skills">
+            <div class="content-card-premium" id="skillsCard">
+                <h2 class="section-headline"><span>01 //</span> Multidisciplinary Competence Matrix Grid</h2>
+                <div class="skills-grid-layout">
+                    
+                    <div class="skill-track-card">
+                        <div class="skill-title-row"><h4>Django Framework Stack</h4><span>Expert</span></div>
+                        <div class="progress-slot-track"><div class="progress-slot-fill" data-width="95%"></div></div>
+                        <div class="legend-labels-wrapper"><span>Beginner</span><span>Elementary</span><span>Intermediate</span><span>Advanced</span><span class="active-tier-status">Expert</span></div>
+                    </div>
+
+                    <div class="skill-track-card">
+                        <div class="skill-title-row"><h4>Python Advanced Core</h4><span>Expert</span></div>
+                        <div class="progress-slot-track"><div class="progress-slot-fill" data-width="92%"></div></div>
+                        <div class="legend-labels-wrapper"><span>Beginner</span><span>Elementary</span><span>Intermediate</span><span>Advanced</span><span class="active-tier-status">Expert</span></div>
+                    </div>
+
+                    <div class="skill-track-card">
+                        <div class="skill-title-row"><h4>PostgreSQL Storage Persistence</h4><span>Advanced</span></div>
+                        <div class="progress-slot-track"><div class="progress-slot-fill" data-width="84%"></div></div>
+                        <div class="legend-labels-wrapper"><span>Beginner</span><span>Elementary</span><span>Intermediate</span><span class="active-tier-status">Advanced</span><span>Expert</span></div>
+                    </div>
+
+                    <div class="skill-track-card">
+                        <div class="skill-title-row"><h4>Docker Isolation Containerization</h4><span>Advanced</span></div>
+                        <div class="progress-slot-track"><div class="progress-slot-fill" data-width="80%"></div></div>
+                        <div class="legend-labels-wrapper"><span>Beginner</span><span>Elementary</span><span>Intermediate</span><span class="active-tier-status">Advanced</span><span>Expert</span></div>
+                    </div>
+
+                    <div class="skill-track-card" style="grid-column: span 1;">
+                        <div class="skill-title-row"><h4>Hosting Operations (AWS Trjit & Ace Cloud)</h4><span>Intermediate</span></div>
+                        <div class="progress-slot-track"><div class="progress-slot-fill" data-width="65%"></div></div>
+                        <div class="legend-labels-wrapper"><span>Beginner</span><span>Elementary</span><span class="active-tier-status">Intermediate</span><span>Advanced</span><span>Expert</span></div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-section" id="slide-experience">
+            <div class="content-card-premium" id="experienceCard">
+                <h2 class="section-headline"><span>02 //</span> Chronological Work Experience Ledgers</h2>
+                <div class="experience-vertical-line">
+                    
+                    <div class="experience-segment-block">
+                        <div class="company-header-wrapper">
+                            <div class="company-main-title">Aigetai Private Limited. <span>Python Developer - Team Leader</span></div>
+                            <div class="duration-pill-badge">Jul 2024 - Present</div>
+                        </div>
+                        <div class="star-performer-tag-glow"><i class="fas fa-star"></i> Star Performer at Aigetai</div>
+                        <ul class="bullet-details-list">
+                            <li>Developed and maintained highly scalable backend frameworks utilizing Python and Django.</li>
+                            <li>Engineered robust RESTful APIs via Django Rest Framework (DRF) serving front-end React and Flutter environments.</li>
+                            <li>Integrated asynchronous task management structures using Celery cluster queues over active Redis caching brokers.</li>
+                            <li>Implemented multi-channel login authentication gateways processing JWT tokens and dynamic SMTP/Twilio OTP verification loops.</li>
+                            <li>Configured immutable virtual container setups using Docker layers and deployed systems onto AWS (EC2, S3) and Trjit clouds hardware networks.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience-segment-block">
+                        <div class="company-header-wrapper">
+                            <div class="company-main-title">The Entrepreneurship Network (TEN) <span>Django Developer</span></div>
+                            <div class="duration-pill-badge">Jun 2024 - Sep 2024</div>
+                        </div>
+                        <ul class="bullet-details-list">
+                            <li>Coded structural API interfaces running automated data telemetry routines for IVR communication systems.</li>
+                            <li>Programmed high-throughput bulk SMS transmission pipelines supporting personalized stream deliveries.</li>
+                            <li>Created organized student profile management models supplying complete backend database CRUD access logic safely.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-section" id="slide-projects">
+            <div class="content-card-premium" id="projectsCard">
+                <h2 class="section-headline"><span>03 //</span> Core Production Portfolio (9 Projects Single-Handedly Completed)</h2>
+                <div class="projects-scroll-wrapper">
+                    
+                    <div class="project-display-pod">
+                        <h3>IVR & Telephony Automation Communications Core Hub</h3>
+                        <p>Independent systems design routing bulk SMS channels alongside completely automated voice call relays. Built unique text-to-speech media compilation engines converting raw plain strings variables directly into audio voice streaming outputs on active calls, setting automated message repeat execution loops based on caller inputs.</p>
+                        <div class="badges-row-cluster"><span>Python Core</span><span>Django Framework</span><span>DRF viewsets</span><span>Twilio Telephony API</span><span>Bulk Queues</span></div>
+                    </div>
+
+                    <div class="project-display-pod">
+                        <h3>Enterprise Health Marketplace System (Tata 1mg Clone Blueprint)</h3>
+                        <p>Complete backend system architecture planning and development handling multi-vendor inventory updates parameters, specialized medicine search indexing catalogs, secure prescription verification safety loops, and path-lab test appointment reservation calendars data lines scheduling tracks.</p>
+                        <div class="badges-row-cluster"><span>Django REST Framework</span><span>PostgreSQL Persistence</span><span>Redis Cache Layer</span><span>Celery Tasks Execution</span></div>
+                    </div>
+
+                    <div class="project-display-pod">
+                        <h3>X-App Platform Integration (Modern Dating Backend Infrastructure)</h3>
+                        <p>Coded full-scale matching algorithms search queries routines, absolute user identity privacy filter walls, and highly optimized database sessions metrics storage matrices to handle massive traffic peaks without performance lags.</p>
+                        <div class="badges-row-cluster"><span>Python Programming</span><span>Django Models API</span><span>Privacy Infrastructure Core</span></div>
+                    </div>
+
+                    <div class="project-display-pod">
+                        <h3>AI Face Swap & Virtual Clothing Changing Engine Interfaces</h3>
+                        <p>Programmed standalone binary files processing pipeline endpoints managing heavy multi-part multimedia request payloads asynchronously without blocking standard web framework synchronous lifecycle loops operations.</p>
+                        <div class="badges-row-cluster"><span>Binary Array Processing</span><span>Asynchronous File Pipes</span><span>Media Filters Architecture</span></div>
+                    </div>
+
+                    <div class="project-details-block project-display-pod">
+                        <h3>Social Media Feed Logic, Headless Browser Apps, Tracking Links Matrix, & Office EMS</h3>
+                        <p>Developed low-latency follower database lookup tables structures optimization, headless web automation background scripts loops, tracking hash-resolution dynamic URL links redirection cores, alongside enterprise-grade multi-tier corporate Role-Based Access Control (RBAC) security database tables schemas.</p>
+                        <div class="badges-row-cluster"><span>Headless Web Automation</span><span>RBAC Controls Matrix</span><span>Database Indexing Logic</span></div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-section" id="slide-publications">
+            <div class="content-card-premium" id="publicationsCard">
+                <h2 class="section-headline"><span>04 //</span> System Awareness & Verified Credentials</h2>
+                <div class="publications-layout-split">
+                    
+                    <div class="publication-card-pod">
+                        <div class="compliance-badge-pills"><i class="fas fa-graduation-cap"></i> BSc - Bachelor of Science Degree</div>
+                        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.65;">Issued by Vasundhara Arts College, Solapur University India. Rigorous academic core foundational coverage targeting system logic frameworks, data processing structures algorithms, and mathematics computational models.</p>
+                    </div>
+
+                    <div class="publication-card-pod">
+                        <div class="compliance-badge-pills"><i class="fas fa-book-open"></i> Architecture System Publications Log</div>
+                        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.6; margin-bottom:12px;"><b>1. High-Availability Monoliths Scalability Strategy:</b> Documentation analyzing transaction connection pooling adjustments configurations inside PostgreSQL clusters to prevent deadlocks.</p>
+                        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;"><b>2. Telephony Telemetry Streams Exception Boundaries:</b> Analytical engineering logs reviewing async callback error handling boundaries rules in distributed environments.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="deck-section" id="slide-contact">
+            <div class="content-card-premium" id="contactCard">
+                <h2 class="section-headline"><span>05 //</span> Execute Secure Transaction Message Protocol</h2>
+                <div class="form-console-rig">
+                    <span class="console-form-header-spec">POST /api/v1/contact/engage HTTP/1.1 -- Content-Type: application/json</span>
+                    
+                    <form id="contactFormRig" onsubmit="dispatchContactPayload(event)" class="form-nodes-flex">
+                        <div class="form-node-block">
+                            <label>"client_identity_tag":</label>
+                            <input type="text" id="nameField" placeholder='"Your Identity Name / Team Recruiter Corporate Designation"' required>
+                        </div>
+                        <div class="form-node-block">
+                            <label>"ssl_routing_destination":</label>
+                            <input type="email" id="emailField" placeholder='"recruiter@enterprise_node.com"' required>
+                        </div>
+                        <div class="form-node-block">
+                            <label>"payload_message_body":</label>
+                            <textarea id="msgField" placeholder='"Specify systems architecture parameters, optimization requirements, or interview sprint schedules..."' required></textarea>
+                        </div>
+                        <button type="submit" class="dispatch-stream-btn"><i class="fas fa-server"></i> Dispatch API Stream Packet</button>
+                    </form>
+                    
+                    <div id="consoleLogFeedback" class="console-status-log-box hidden"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const totalSlides = 6;
+        let currentSlideIndex = 0;
+        let isScrollLocked = false;
+
+        const mainDeck = document.getElementById('mainDeck');
+        const dotsContainer = document.getElementById('dots-container');
+        const terminalStream = document.getElementById('terminalStreamOutput');
+
+        // Dynamic System Log Strings
+        const logLinesPool = [
+            "&gt; Injecting PostgreSQL connection parameters database cluster matrix...",
+            "&gt; Spawning Celery async workers pool node streams successfully...",
+            "&gt; Mounting virtual layers via immutable Docker containers mappings...",
+            "&gt; Parsing target system variables... Declassifying profile metadata...",
+            "&gt; [SUCCESS] API Gateway online. System integrity authenticated."
+        ];
+        
+        let lineIdx = 0;
+        const logInterval = setInterval(() => {
+            if(lineIdx < logLinesPool.length) {
+                terminalStream.innerHTML += logLinesPool[lineIdx] + "<br>";
+                lineIdx++;
+            } else {
+                clearInterval(logInterval);
+            }
+        }, 300);
+
+        // Navigation Tracker Setup
+        window.addEventListener('DOMContentLoaded', () => {
+            for(let i=0; i<totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = `tracker-dot ${i === 0 ? 'active-dot' : ''}`;
+                dot.onclick = () => jumpToSlideIndex(i);
+                dotsContainer.appendChild(dot);
+            }
+            
+            // FIXED TIMEOUT FUNCTION HANDLER
+            setTimeout(() => {
+                const loader = document.getElementById('loading-screen');
+                if(loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.visibility = 'hidden';
+                    }, 800);
+                }
+                triggerProgressLineAnimations(0); // Calling the correct function name here
+            }, 2400);
+        });
+
+        // --- 3D INTERACTIVE GYROSCOPIC TILT LOGIC ---
+        document.addEventListener('mousemove', (e) => {
+            const currentActiveCard = document.querySelectorAll('.deck-section')[currentSlideIndex].querySelector('.content-card-premium');
+            if(!currentActiveCard) return;
+
+            const xRotationAxisAngle = (window.innerWidth / 2 - e.pageX) / 45;
+            const yRotationAxisAngle = (window.innerHeight / 2 - e.pageY) / 45;
+
+            currentActiveCard.style.transform = `rotateY(${xRotationAxisAngle}deg) rotateX(${-yRotationAxisAngle}deg) translateZ(10px)`;
+        });
+
+        // --- NESTED SMART SCROLL EVALUATION ENGINE ---
+        window.addEventListener('wheel', (e) => {
+            if (isScrollLocked) return;
+
+            const activeCard = document.querySelectorAll('.deck-section')[currentSlideIndex].querySelector('.content-card-premium');
+            
+            if (activeCard) {
+                const currentScrollTop = activeCard.scrollTop;
+                const maximumScrollHeight = activeCard.scrollHeight - activeCard.clientHeight;
+
+                if (e.deltaY > 15) {
+                    if (currentScrollTop < maximumScrollHeight - 3) {
+                        return;
+                    } else {
+                        if (currentSlideIndex < totalSlides - 1) {
+                            currentSlideIndex++;
+                            executeDeckTransitionAnimation();
+                        }
+                    }
+                } 
+                else if (e.deltaY < -15) {
+                    if (currentScrollTop > 3) {
+                        return;
+                    } else {
+                        if (currentSlideIndex > 0) {
+                            currentSlideIndex--;
+                            executeDeckTransitionAnimation();
+                        }
+                    }
+                }
+            }
+        });
+
+        // Mobile Touch Support Mapping
+        let touchStartCoordY = 0;
+        window.addEventListener('touchstart', (e) => { touchStartCoordY = e.touches[0].clientY; });
+        window.addEventListener('touchend', (e) => {
+            if (isScrollLocked) return;
+            const activeCard = document.querySelectorAll('.deck-section')[currentSlideIndex].querySelector('.content-card-premium');
+            let touchEndCoordY = e.changedTouches[0].clientY;
+            
+            if (activeCard) {
+                const currentScrollTop = activeCard.scrollTop;
+                const maximumScrollHeight = activeCard.scrollHeight - activeCard.clientHeight;
+
+                if (touchStartCoordY - touchEndCoordY > 40) { 
+                    if (currentScrollTop >= maximumScrollHeight - 3 && currentSlideIndex < totalSlides - 1) {
+                        currentSlideIndex++; executeDeckTransitionAnimation();
+                    }
+                } else if (touchEndCoordY - touchStartCoordY > 40) { 
+                    if (currentScrollTop <= 3 && currentSlideIndex > 0) {
+                        currentSlideIndex--; executeDeckTransitionAnimation();
+                    }
+                }
+            }
+        });
+
+        function jumpToSlideIndex(targetIndex) {
+            if(isScrollLocked) return;
+            currentSlideIndex = targetIndex;
+            executeDeckTransitionAnimation();
+        }
+
+        function triggerNextSlideStep() {
+            if(currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                executeDeckTransitionAnimation();
+            }
+        }
+
+        function executeDeckTransitionAnimation() {
+            isScrollLocked = true;
+            mainDeck.style.transform = `translateY(-${currentSlideIndex * 100}vh)`;
+
+            const sections = document.querySelectorAll('.deck-section');
+            sections.forEach(sec => {
+                sec.classList.remove('active-slide');
+                const innerCard = sec.querySelector('.content-card-premium');
+                if(innerCard) innerCard.style.transform = "rotateY(0deg) rotateX(0deg)";
+            });
+            sections[currentSlideIndex].classList.add('active-slide');
+
+            const dots = document.querySelectorAll('.tracker-dot');
+            dots.forEach(dot => dot.classList.remove('active-dot'));
+            dots[currentSlideIndex].classList.add('active-dot');
+
+            triggerProgressLineAnimations(currentSlideIndex);
+
+            setTimeout(() => { isScrollLocked = false; }, 850);
+        }
+
+        function triggerProgressLineAnimations(slideIndex) {
+            const currentSlide = document.querySelectorAll('.deck-section')[slideIndex];
+            const bars = currentSlide.querySelectorAll('.progress-slot-fill');
+            if(bars.length > 0) {
+                bars.forEach(bar => { bar.style.width = bar.getAttribute('data-width'); });
+            }
+        }
+
+        function dispatchContactPayload(event) {
+            event.preventDefault();
+            const logBox = document.getElementById('consoleLogFeedback');
+            logBox.classList.remove('hidden');
+            logBox.style.color = "var(--neon-cyan)";
+            logBox.innerHTML = `[TRANSACTION STATUS] Launching async thread pooling...<br>[ROUTING] Binding secure SMTP payload string array structures metrics...`;
+
+            setTimeout(() => {
+                logBox.style.color = "var(--neon-green)";
+                logBox.innerHTML = `
+<b>HTTP/1.1 202 TRANSACTION_LOGGED_SUCCESSFULLY</b><br>
+Active Routing Proxy: Secure_Pravin_Django_CMS_Gateway<br>
+System Integrity: 100% Packets committed successfully. Pravin Namaji's core asynchronous cron listeners will process this task loop and open direct channels parameters contact with your enterprise soon.
+                `;
+                document.getElementById('contactFormRig').reset();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
